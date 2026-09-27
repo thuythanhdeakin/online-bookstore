@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Bookstore — Search</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar navbar-expand-lg sticky-top pt-navbar">
+    <div class="container">
+      <a class="navbar-brand pt-brand" href="index.html">Online Bookstore</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="books.html">Books</a></li>
+          <li class="nav-item"><a class="nav-link active" href="search.html">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="query.html">Query / FAQ</a></li>
+        </ul>
+        <div id="navAuth" class="ms-3"></div>
+        <!-- Cart icon -->
+        <div class="pt-cart-wrapper ms-3">
+          <button class="pt-cart-btn" onclick="toggleCart(event)" aria-label="Shopping cart">
+            🛒
+            <span class="pt-cart-badge" id="cartBadge">0</span>
+          </button>
+          <div class="pt-cart-dropdown" id="cartDropdown">
+            <h6>Your cart</h6>
+            <div id="cartItems">
+              <p class="text-muted small mb-0">Your cart is empty.</p>
+            </div>
+            <div class="pt-cart-total" id="cartTotal" style="display:none;">
+              <span>Total</span>
+              <span id="cartTotalAmount">$0.00</span>
+            </div>
+            <a href="checkout.html" class="btn pt-btn w-100 mt-3" id="checkoutBtn" style="display:none;">Checkout &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== SEARCH SECTION ===== -->
+  <section class="py-5">
+    <div class="container" style="max-width:760px;">
+
+      <h1 class="pt-section-title mb-4">Search our catalogue</h1>
+
+      <div class="pt-search-box mb-4">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-500">Title, author, or keyword</label>
+            <input type="text" id="searchKeyword" class="form-control"
+              placeholder="e.g. Gatsby, Hawking, history..."
+              onkeydown="if(event.key==='Enter') doSearch()" />
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-500">Genre</label>
+            <select id="searchGenre" class="form-select">
+              <option value="all">All genres</option>
+              <option value="fiction">Fiction</option>
+              <option value="nonfiction">Non-Fiction</option>
+              <option value="childrens">Children's</option>
+              <option value="romance">Romance</option>
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-500">Max price</label>
+            <select id="searchPrice" class="form-select">
+              <option value="all">Any price</option>
+              <option value="15">Under $15</option>
+              <option value="25">Under $25</option>
+              <option value="35">Under $35</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <button class="btn pt-btn" onclick="doSearch()">Search</button>
+            <button class="btn pt-btn-outline ms-2" onclick="clearSearch()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results area -->
+      <div id="resultsArea">
+        <p class="text-muted small">Enter a search term above and click Search.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== BOOK MODAL ===== -->
+  <div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <div class="d-flex gap-4">
+            <img id="modalCover" src="" alt="Book cover" style="width:110px; height:160px; object-fit:cover; border-radius:4px; flex-shrink:0;" />
+            <div>
+              <span id="modalBadge" class="badge pt-badge mb-2"></span>
+              <h5 id="modalTitle" class="pt-card-title" style="font-size:1.1rem;"></h5>
+              <p id="modalAuthor" class="pt-card-author"></p>
+              <p id="modalPrice" class="pt-price mb-3"></p>
+                            <p id="modalDesc" class="small text-muted mb-3"></p>
+              <button class="btn pt-btn btn-sm" onclick="addToCartFromModal()">&#43; Add to cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="pt-footer py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="pt-footer-brand">Online Bookstore</h6>
+          <p class="small text-muted">Your independent online bookstore, based in Melbourne.</p>
+        </div>
+        <div class="col-md-4">
+          <h6>Quick links</h6>
+          <ul class="list-unstyled small">
+            <li><a href="index.html" class="pt-footer-link">Home</a></li>
+            <li><a href="books.html" class="pt-footer-link">Books</a></li>
+            <li><a href="search.html" class="pt-footer-link">Search</a></li>
+            <li><a href="contact.html" class="pt-footer-link">Contact Us</a></li>
+            <li><a href="query.html" class="pt-footer-link">Query / FAQ</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h6>Contact</h6>
+          <p class="small text-muted">
+            123 Bookshelf Lane, Melbourne VIC 3000<br />
+            +61 3 9000 1234<br />
+            hello@onlinebookstore.com.au
+          </p>
+        </div>
+      </div>
+      <hr />
+      <p class="text-center small text-muted mb-0">&copy; 2026 Online Bookstore. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    var books = [
+      { title: 'The Great Gatsby',                    author: 'F. Scott Fitzgerald', genre: 'fiction',    price: 18.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780743273565-M.jpg',
+        desc: 'Set in the Jazz Age on Long Island, the novel depicts narrator Nick Carraway\'s interactions with mysterious millionaire Jay Gatsby and his obsession with reuniting with his former lover Daisy Buchanan.' },
+      { title: 'The Catcher in the Rye',              author: 'J.D. Salinger',       genre: 'fiction',    price: 16.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780316769174-M.jpg',
+        desc: 'Narrated by the rebellious Holden Caulfield, this coming-of-age novel follows his journey through New York City after being expelled from prep school, exploring themes of identity and alienation.' },
+      { title: 'To Kill a Mockingbird',               author: 'Harper Lee',          genre: 'fiction',    price: 19.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780061965012-M.jpg',
+        desc: 'Through the eyes of young Scout Finch in the American South, this Pulitzer Prize-winning novel tackles racial injustice and moral growth as her father defends a Black man accused of a crime.' },
+      { title: "The Handmaid's Tale",                 author: 'Margaret Atwood',     genre: 'fiction',    price: 22.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780385490818-M.jpg',
+        desc: 'A dystopian novel set in the totalitarian Republic of Gilead, where women are stripped of their rights. The story follows Offred, a Handmaid assigned to bear children for an elite couple.' },
+      { title: 'The Old Man and the Sea',             author: 'Ernest Hemingway',    genre: 'fiction',    price: 15.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780060935467-M.jpg',
+        desc: 'An aging Cuban fisherman embarks on an epic struggle with a giant marlin far out in the Gulf Stream. A Pulitzer Prize-winning tale of perseverance, pride, and the human spirit.' },
+      { title: 'Of Mice and Men',                     author: 'John Steinbeck',      genre: 'fiction',    price: 14.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780142000670-M.jpg',
+        desc: 'Two displaced migrant workers during the Great Depression move from place to place in California, driven by their shared dream of one day owning a small farm of their own.' },
+      { title: 'A Brief History of Time',             author: 'Stephen Hawking',     genre: 'nonfiction', price: 29.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780671027032-M.jpg',
+        desc: "Stephen Hawking's landmark work explores the universe's origins, black holes, the nature of time, and the possibility of a unified theory of physics — written for general audiences." },
+      { title: 'Leonardo da Vinci',                   author: 'Walter Isaacson',     genre: 'nonfiction', price: 31.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780743260756-M.jpg',
+        desc: "Based on thousands of pages from Leonardo's notebooks, Isaacson weaves a compelling narrative of a genius whose passion for both art and science made him history's most creative mind." },
+      { title: 'Thinking, Fast and Slow',             author: 'Daniel Kahneman',     genre: 'nonfiction', price: 27.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780374533557-M.jpg',
+        desc: 'Nobel laureate Daniel Kahneman explores the two systems that drive the way we think — fast intuitive System 1 and slower deliberate System 2 — and how they shape our judgments and decisions.' },
+      { title: "Harry Potter and the Sorcerer's Stone", author: 'J.K. Rowling',      genre: 'childrens',  price: 14.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg',
+        desc: 'Harry Potter discovers on his eleventh birthday that he is the orphaned son of two powerful wizards and is invited to attend Hogwarts School of Witchcraft and Wizardry.' },
+      { title: "Charlotte's Web",                     author: 'E.B. White',          genre: 'childrens',  price:  9.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780064404990-M.jpg',
+        desc: 'A loving friendship between a pig named Wilbur and a spider named Charlotte, who weaves words into her web to save his life. A timeless story about friendship, loss, and the cycle of life.' },
+      { title: 'The Fault in Our Stars',              author: 'John Green',          genre: 'romance',    price: 16.99,
+        img: 'https://covers.openlibrary.org/b/isbn/9780525478812-M.jpg',
+        desc: 'Sixteen-year-old Hazel Grace Lancaster meets and falls in love with the charismatic Augustus Waters at a cancer patient support group, in this heartfelt and witty love story.' }
+    ];
+
+    function openBookModal(index) {
+      var book = books[index];
+      document.getElementById('modalCover').src          = book.img;
+      document.getElementById('modalCover').alt          = book.title + ' cover';
+      document.getElementById('modalBadge').textContent  = book.genre.charAt(0).toUpperCase() + book.genre.slice(1);
+      document.getElementById('modalTitle').textContent  = book.title;
+      document.getElementById('modalAuthor').textContent = 'by ' + book.author;
+      document.getElementById('modalPrice').textContent  = '$' + book.price.toFixed(2);
+      document.getElementById('modalDesc').textContent   = book.desc;
+      var modal = new bootstrap.Modal(document.getElementById('bookModal'));
+      modal.show();
+    }
+
+    function doSearch() {
+      var keyword  = document.getElementById('searchKeyword').value.toLowerCase().trim();
+      var genre    = document.getElementById('searchGenre').value;
+      var maxPrice = document.getElementById('searchPrice').value;
+      var area     = document.getElementById('resultsArea');
+
+      var results = books.filter(function(b) {
+        var matchKeyword = keyword === '' ||
+          b.title.toLowerCase().includes(keyword) ||
+          b.author.toLowerCase().includes(keyword);
+        var matchGenre = genre === 'all' || b.genre === genre;
+        var matchPrice = maxPrice === 'all' || b.price < parseFloat(maxPrice);
+        return matchKeyword && matchGenre && matchPrice;
+      });
+
+      if (results.length === 0) {
+        area.innerHTML = '<p class="text-muted">No books found matching your search. Try different terms.</p>';
+        return;
+      }
+
+      var html = '<p class="small text-muted mb-3">Found <strong>' + results.length + '</strong> result' + (results.length > 1 ? 's' : '') + '</p>';
+
+      results.forEach(function(b) {
+        var idx = books.indexOf(b);
+        var genreLabel = b.genre === 'nonfiction' ? 'Non-Fiction' : (b.genre.charAt(0).toUpperCase() + b.genre.slice(1));
+        html += '<div class="pt-result-item pt-clickable-card" onclick="openBookModal(' + idx + ')">'
+          + '<img src="' + b.img + '" class="pt-result-img" alt="' + b.title + ' cover" />'
+          + '<div>'
+          + '<h6 class="pt-card-title mb-1">' + b.title + '</h6>'
+          + '<p class="pt-card-author mb-1">by ' + b.author + ' &middot; ' + genreLabel + '</p>'
+          + '<p class="pt-price mb-0">$' + b.price.toFixed(2) + '</p>'
+          + '</div></div>';
+      });
+
+      area.innerHTML = html;
+    }
+
+    function clearSearch() {
+      document.getElementById('searchKeyword').value  = '';
+      document.getElementById('searchGenre').value    = 'all';
+      document.getElementById('searchPrice').value    = 'all';
+      document.getElementById('resultsArea').innerHTML = '<p class="text-muted small">Enter a search term above and click Search.</p>';
+    }
+  
+  function addToCartFromModal() {
+    var title  = document.getElementById('modalTitle').textContent;
+    var author = document.getElementById('modalAuthor').textContent.replace('by ', '');
+    var price  = parseFloat(document.getElementById('modalPrice').textContent.replace('$', ''));
+    var img    = document.getElementById('modalCover').src;
+    addToCart(title, author, price, img);
+    bootstrap.Modal.getInstance(document.getElementById('bookModal')).hide();
+  }
+</script>
+  <script src="cart.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

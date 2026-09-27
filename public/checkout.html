@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Bookstore – Checkout</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top pt-navbar">
+  <div class="container">
+    <a class="navbar-brand pt-brand" href="index.html">Online Bookstore</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="books.html">Books</a></li>
+        <li class="nav-item"><a class="nav-link" href="search.html">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+        <li class="nav-item"><a class="nav-link" href="query.html">Query / FAQ</a></li>
+      </ul>
+      <div id="navAuth" class="ms-3"></div>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-hero py-4 text-center">
+  <div class="container">
+    <h1 class="pt-hero-title text-center text-uppercase" style="font-size:2rem;">Checkout</h1>
+  </div>
+</div>
+
+<!-- Not logged in -->
+<div id="notLoggedIn" class="d-none py-5">
+  <div class="container text-center" style="max-width:500px;">
+    <div class="pt-form-card">
+      <p class="mb-3">🔒 Please log in to complete your purchase.</p>
+      <a href="login.html" class="btn pt-btn me-2">Login</a>
+      <a href="register.html" class="btn pt-btn-outline">Register</a>
+    </div>
+  </div>
+</div>
+
+<!-- Empty cart -->
+<div id="emptyCart" class="d-none py-5">
+  <div class="container text-center" style="max-width:500px;">
+    <div class="pt-form-card">
+      <p class="mb-3">Your cart is empty.</p>
+      <a href="books.html" class="btn pt-btn">Browse books</a>
+    </div>
+  </div>
+</div>
+
+<!-- Success -->
+<div id="successSection" class="d-none py-5">
+  <div class="container text-center" style="max-width:540px;">
+    <div class="pt-form-card">
+      <h2 class="pt-section-title mb-3" style="border:none;">🎉 Order confirmed!</h2>
+      <p class="text-muted mb-1">Thank you for your purchase.</p>
+      <p class="text-muted mb-3">You earned <strong id="pointsEarned" class="text-success"></strong> points!</p>
+      <a href="books.html" class="btn pt-btn me-2">Continue shopping</a>
+      <a href="profile.html" class="btn pt-btn-outline">View profile</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main checkout -->
+<section id="checkoutSection" class="py-5 d-none">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- Left: form -->
+      <div class="col-lg-7">
+        <h2 class="pt-section-title mb-4">Delivery details</h2>
+        <div id="errorMsg" class="alert alert-danger d-none"></div>
+
+        <div class="pt-form-card">
+          <div class="mb-3">
+            <label class="form-label">Full name *</label>
+            <input type="text" id="full_name" class="form-control" placeholder="Your full name" />
+            <div id="fnameError" class="pt-error">Please enter your full name.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email address *</label>
+            <input type="text" id="email" class="form-control" placeholder="you@example.com" />
+            <div id="emailError" class="pt-error">Please enter a valid email address.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Street address *</label>
+            <input type="text" id="address" class="form-control" placeholder="123 Example St" />
+            <div id="addressError" class="pt-error">Please enter your address.</div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-sm-7">
+              <label class="form-label">City / Suburb *</label>
+              <input type="text" id="city" class="form-control" placeholder="Melbourne" />
+              <div id="cityError" class="pt-error">Please enter your city.</div>
+            </div>
+            <div class="col-sm-5">
+              <label class="form-label">Postcode *</label>
+              <input type="text" id="postcode" class="form-control" placeholder="3000" />
+              <div id="postcodeError" class="pt-error">Please enter your postcode.</div>
+            </div>
+          </div>
+
+          <h2 class="pt-section-title mb-3 mt-4" style="font-size:1.1rem;">Payment method</h2>
+          <div class="mb-2">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment" id="payCredit" value="Credit Card" checked />
+              <label class="form-check-label" for="payCredit">💳 Credit / Debit Card</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="payment" id="payPaypal" value="PayPal" />
+              <label class="form-check-label" for="payPaypal">🅿️ PayPal</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment" id="payAfter" value="Afterpay" />
+              <label class="form-check-label" for="payAfter">🔁 Afterpay</label>
+            </div>
+          </div>
+          <div id="payError" class="pt-error">Please select a payment method.</div>
+        </div>
+      </div>
+
+      <!-- Right: order summary -->
+      <div class="col-lg-5">
+        <h2 class="pt-section-title mb-4">Order summary</h2>
+        <div class="pt-form-card">
+          <div id="orderItems"></div>
+          <hr />
+          <div class="d-flex justify-content-between fw-bold">
+            <span>Total</span>
+            <span id="orderTotal" class="pt-price"></span>
+          </div>
+          <p class="small text-muted mt-2 mb-0">🏆 You'll earn <strong id="pointsPreview"></strong> points with this order!</p>
+          <button class="btn pt-btn w-100 mt-4" onclick="placeOrder()">Place order</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="pt-footer py-4">
+  <div class="container">
+    <p class="text-center small mb-0">&copy; 2026 Online Bookstore. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="cart.js"></script>
+<script>
+
+  function setError(id, show) {
+    const el = document.getElementById(id);
+    if (show) el.classList.add('visible');
+    else el.classList.remove('visible');
+  }
+
+  async function init() {
+    // Re-read cart fresh from localStorage
+    try {
+      var stored = JSON.parse(localStorage.getItem('pt_cart') || '[]');
+      if (Array.isArray(stored)) {
+        cart = stored.filter(function(i) {
+          return i && typeof i.title === 'string' && typeof i.price === 'number' && i.qty > 0;
+        });
+      }
+    } catch(e) { cart = []; }
+    const res = await fetch('/api/me');
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+      document.getElementById('notLoggedIn').classList.remove('d-none');
+      return;
+    }
+
+    currentUser = data.user;
+
+    // Update navbar
+    document.getElementById('navAuth').innerHTML =
+      `<span class="small text-muted me-2">Hi, ${data.user.full_name}</span>
+       <a href="profile.html" class="btn btn-sm pt-btn-outline me-2">Profile</a>
+       <button class="btn btn-sm pt-btn-outline" onclick="doLogout()">Logout</button>`;
+
+    // Check cart
+    if (!cart || cart.length === 0) {
+      document.getElementById('emptyCart').classList.remove('d-none');
+      return;
+    }
+
+    // Show checkout
+    document.getElementById('checkoutSection').classList.remove('d-none');
+
+    // Pre-fill user info
+    document.getElementById('full_name').value = data.user.full_name || '';
+    document.getElementById('email').value = data.user.email || '';
+
+    // Render order items
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    let html = '';
+    cart.forEach(item => {
+      html += `<div class="d-flex align-items-center gap-3 mb-3">
+        <img src="${item.img}" style="width:45px;height:62px;object-fit:cover;border-radius:3px;" />
+        <div class="flex-grow-1">
+          <p class="mb-0 small fw-600" style="font-family:var(--font-serif)">${item.title}</p>
+          <p class="mb-0 small text-muted">Qty: ${item.qty}</p>
+        </div>
+        <span class="pt-price small">$${(item.price * item.qty).toFixed(2)}</span>
+      </div>`;
+    });
+    document.getElementById('orderItems').innerHTML = html;
+    document.getElementById('orderTotal').textContent = '$' + total.toFixed(2);
+    document.getElementById('pointsPreview').textContent = Math.floor(total);
+  }
+
+  async function placeOrder() {
+    const full_name = document.getElementById('full_name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const postcode = document.getElementById('postcode').value.trim();
+    const paymentEl = document.querySelector('input[name="payment"]:checked');
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.classList.add('d-none');
+
+    let valid = true;
+    if (!full_name) { setError('fnameError', true); valid = false; } else setError('fnameError', false);
+    if (!email || !email.includes('@')) { setError('emailError', true); valid = false; } else setError('emailError', false);
+    if (!address) { setError('addressError', true); valid = false; } else setError('addressError', false);
+    if (!city) { setError('cityError', true); valid = false; } else setError('cityError', false);
+    if (!postcode) { setError('postcodeError', true); valid = false; } else setError('postcodeError', false);
+    if (!paymentEl) { setError('payError', true); valid = false; } else setError('payError', false);
+    if (!valid) return;
+
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name, email, address, city, postcode,
+          payment_method: paymentEl.value,
+          items: cart,
+          total
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorMsg.textContent = data.error;
+        errorMsg.classList.remove('d-none');
+        return;
+      }
+
+      // Clear cart
+      localStorage.removeItem('pt_cart');
+
+      // Show success
+      document.getElementById('checkoutSection').classList.add('d-none');
+      document.getElementById('successSection').classList.remove('d-none');
+      document.getElementById('pointsEarned').textContent = data.pointsEarned;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      errorMsg.textContent = 'Something went wrong. Please try again.';
+      errorMsg.classList.remove('d-none');
+    }
+  }
+
+  async function doLogout() {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = 'index.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

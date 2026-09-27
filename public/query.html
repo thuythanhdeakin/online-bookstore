@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PageTurn Books — Query / FAQ</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar navbar-expand-lg sticky-top pt-navbar">
+    <div class="container">
+      <a class="navbar-brand pt-brand" href="index.html">Online Bookstore</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="books.html">Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="search.html">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+          <li class="nav-item"><a class="nav-link active" href="query.html">Query / FAQ</a></li>
+        </ul>
+        <div id="navAuth" class="ms-3"></div>
+        <!-- Cart icon -->
+        <div class="pt-cart-wrapper ms-3">
+          <button class="pt-cart-btn" onclick="toggleCart(event)" aria-label="Shopping cart">
+            🛒
+            <span class="pt-cart-badge" id="cartBadge">0</span>
+          </button>
+          <div class="pt-cart-dropdown" id="cartDropdown">
+            <h6>Your cart</h6>
+            <div id="cartItems">
+              <p class="text-muted small mb-0">Your cart is empty.</p>
+            </div>
+            <div class="pt-cart-total" id="cartTotal" style="display:none;">
+              <span>Total</span>
+              <span id="cartTotalAmount">$0.00</span>
+            </div>
+            <a href="checkout.html" class="btn pt-btn w-100 mt-3" id="checkoutBtn" style="display:none;">Checkout &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="pt-hero py-4 text-center">
+    <div class="container">
+      <h1 class="pt-hero-title" style="font-size:2rem;">Query &amp; FAQ</h1>
+      <p class="pt-hero-sub" style="font-size:0.95rem;">Send us a question or browse common queries below</p>
+    </div>
+  </div>
+
+  <!-- ===== QUERY FORM ===== -->
+  <section class="py-5">
+    <div class="container" style="max-width: 700px;">
+      <h2 class="pt-section-title mb-4">Send us a query</h2>
+
+      <!-- Login required banner (shown when not logged in) -->
+      <div id="loginBanner" class="alert d-none mb-3" role="alert"
+        style="background-color:#fdf3e7; border:1px solid #e8c99a; color:#7a4f1e;">
+        🔒 Please <a href="login.html" class="alert-link" style="color:#8b5e3c;">log in</a>
+        or <a href="register.html" class="alert-link" style="color:#8b5e3c;">register</a>
+        to submit a query.
+      </div>
+
+      <!-- Success message -->
+      <div id="successMsg" class="alert alert-success d-none" role="alert">
+        Thank you! Your query has been submitted. We'll get back to you within 1&ndash;2 business days.
+      </div>
+
+      <div class="pt-form-card">
+        <p class="text-muted small mb-4">Fields marked with * are required.</p>
+
+        <div class="mb-3">
+          <label for="fname" class="form-label">Full name *</label>
+          <input type="text" id="fname" class="form-control" placeholder="Your full name" />
+          <div id="fnameError" class="pt-error">Please enter your full name.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address *</label>
+          <input type="text" id="email" class="form-control" placeholder="you@example.com" />
+          <div id="emailError" class="pt-error">Please enter a valid email address (must contain @).</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="phone" class="form-label">Phone number <span class="text-muted">(optional)</span></label>
+          <input type="text" id="phone" class="form-control" style="max-width:280px;" placeholder="e.g. 0412 345 678" />
+          <div id="phoneError" class="pt-error">Phone number must contain digits only and be no longer than 15 characters.</div>
+        </div>
+
+        <div class="mb-4">
+          <label for="queryText" class="form-label">Your query *</label>
+          <textarea id="queryText" class="form-control" rows="5" placeholder="Type your question or feedback here..."></textarea>
+          <div id="queryError" class="pt-error">Please enter your query.</div>
+        </div>
+
+        <button type="button" class="btn pt-btn" id="submitBtn" onclick="submitQuery()">Submit query</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="pt-section-alt py-5">
+    <div class="container" style="max-width:700px;">
+      <h2 class="pt-section-title mb-4">Frequently asked questions</h2>
+      <div class="accordion pt-faq" id="faqAccordion">
+
+        <div class="accordion-item border mb-2 rounded">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">Do you offer delivery?</button>
+          </h2>
+          <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body small text-muted">Yes, we ship across Australia via Australia Post. Standard delivery takes 3–5 business days. Express delivery (1–2 business days) is available at checkout for an additional fee.</div>
+          </div>
+        </div>
+
+        <div class="accordion-item border mb-2 rounded">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">Can I return or exchange a book?</button>
+          </h2>
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body small text-muted">Returns are accepted within 14 days of purchase, provided the book is in its original condition. Please contact us via the query form above to initiate a return.</div>
+          </div>
+        </div>
+
+        <div class="accordion-item border mb-2 rounded">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">Can I order a book that's not in your catalogue?</button>
+          </h2>
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body small text-muted">Absolutely! Send us the title and author via the query form above and we'll do our best to source it for you. Special orders typically take 7–14 business days.</div>
+          </div>
+        </div>
+
+        <div class="accordion-item border mb-2 rounded">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">Do you offer gift wrapping?</button>
+          </h2>
+          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body small text-muted">Yes! Gift wrapping is available for $3.50 per item. Simply mention it in the query form or during checkout once the feature is live.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="pt-footer py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="pt-footer-brand">Online Bookstore</h6>
+          <p class="small text-muted">Your independent online bookstore, based in Melbourne.</p>
+        </div>
+        <div class="col-md-4">
+          <h6>Quick links</h6>
+          <ul class="list-unstyled small">
+            <li><a href="index.html" class="pt-footer-link">Home</a></li>
+            <li><a href="books.html" class="pt-footer-link">Books</a></li>
+            <li><a href="search.html" class="pt-footer-link">Search</a></li>
+            <li><a href="contact.html" class="pt-footer-link">Contact Us</a></li>
+            <li><a href="query.html" class="pt-footer-link">Query / FAQ</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h6>Contact</h6>
+          <p class="small text-muted">
+            123 Bookshelf Lane, Melbourne VIC 3000<br />
+            +61 3 9000 1234<br />
+            hello@onlinebookstore.com.au
+          </p>
+        </div>
+      </div>
+      <hr />
+      <p class="text-center small text-muted mb-0">&copy; 2026 Online Bookstore. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Check login status on page load
+    fetch('/api/me').then(r => r.json()).then(data => {
+      if (data.loggedIn) {
+        // Logged in — enable form, pre-fill email
+        document.getElementById('fname').value = data.user.full_name;
+        document.getElementById('email').value = data.user.email;
+        if (data.user.phone) document.getElementById('phone').value = data.user.phone;
+      } else {
+        // Not logged in — disable all inputs and submit button
+        document.getElementById('loginBanner').classList.remove('d-none');
+        document.getElementById('fname').disabled = true;
+        document.getElementById('email').disabled = true;
+        document.getElementById('phone').disabled = true;
+        document.getElementById('queryText').disabled = true;
+        document.getElementById('submitBtn').disabled = true;
+      }
+    });
+
+    async function submitQuery() {
+      var fname     = document.getElementById('fname').value.trim();
+      var email     = document.getElementById('email').value.trim();
+      var phone     = document.getElementById('phone').value.trim();
+      var queryText = document.getElementById('queryText').value.trim();
+      var valid     = true;
+
+      function setError(id, show) {
+        var el = document.getElementById(id);
+        if (show) el.classList.add('visible');
+        else el.classList.remove('visible');
+      }
+
+      if (fname === '') { setError('fnameError', true); valid = false; }
+      else setError('fnameError', false);
+
+      if (email === '' || !email.includes('@') || email.indexOf('@') === 0 || email.indexOf('@') === email.length - 1) {
+        setError('emailError', true); valid = false;
+      } else setError('emailError', false);
+
+      if (phone !== '') {
+        var phoneDigits = phone.replace(/\s/g, '');
+        if (!/^\d+$/.test(phoneDigits) || phoneDigits.length > 15) {
+          setError('phoneError', true); valid = false;
+        } else setError('phoneError', false);
+      } else setError('phoneError', false);
+
+      if (queryText === '') { setError('queryError', true); valid = false; }
+      else setError('queryError', false);
+
+      if (!valid) return;
+
+      /* Save to database */
+      try {
+        const res = await fetch('/api/queries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name: fname, email: email, phone: phone, query_message: queryText })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Something went wrong. Please try again.');
+          return;
+        }
+      } catch (err) {
+        alert('Could not connect to server. Please try again.');
+        return;
+      }
+
+      document.getElementById('successMsg').classList.remove('d-none');
+      document.getElementById('queryText').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+  <script src="cart.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

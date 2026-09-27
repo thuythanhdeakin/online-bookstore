@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Bookstore – Register</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg sticky-top pt-navbar">
+  <div class="container">
+    <a class="navbar-brand pt-brand" href="index.html">Online Bookstore</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="books.html">Books</a></li>
+        <li class="nav-item"><a class="nav-link" href="search.html">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+        <li class="nav-item"><a class="nav-link" href="query.html">Query / FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<section class="py-5">
+  <div class="container" style="max-width:540px;">
+    <h1 class="pt-section-title mb-4 text-center text-uppercase">Create an account</h1>
+
+    <div id="errorMsg" class="alert alert-danger d-none"></div>
+    <div id="successMsg" class="alert alert-success d-none">
+      Account created! Redirecting...
+    </div>
+
+    <div class="pt-form-card">
+     
+
+      <div class="mb-3">
+        <label class="form-label">Full name *</label>
+        <input type="text" id="full_name" class="form-control" placeholder="Your full name" />
+        <div id="fnameError" class="pt-error">Please enter your full name.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Email address *</label>
+        <input type="text" id="email" class="form-control" placeholder="you@example.com" />
+        <div id="emailError" class="pt-error">Please enter a valid email address.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password * <span class="text-muted">(min. 6 characters)</span></label>
+        <input type="password" id="password" class="form-control" placeholder="Choose a password" />
+        <div id="passError" class="pt-error">Password must be at least 6 characters.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Phone number <span class="text-muted">(optional)</span></label>
+        <input type="text" id="phone" class="form-control" style="max-width:280px;" placeholder="e.g. 0412 345 678" />
+        <div id="phoneError" class="pt-error">Phone must contain digits only, max 15 characters.</div>
+      </div>
+
+      <button class="btn pt-btn w-100" onclick="doRegister()">Create account</button>
+      <p class="text-center small text-muted mt-3">
+        Already have an account? <a href="login.html" class="pt-link">Login here</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="pt-footer py-4">
+  <div class="container">
+    <p class="text-center small mb-0">&copy; 2026 Online Bookstore. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function setError(id, show) {
+    const el = document.getElementById(id);
+    if (show) el.classList.add('visible');
+    else el.classList.remove('visible');
+  }
+
+  async function doRegister() {
+    const full_name = document.getElementById('full_name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const phone = document.getElementById('phone').value.trim();
+
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.classList.add('d-none');
+
+    // Client-side validation
+    let valid = true;
+
+    if (!full_name) { setError('fnameError', true); valid = false; }
+    else setError('fnameError', false);
+
+    if (!email || !email.includes('@')) { setError('emailError', true); valid = false; }
+    else setError('emailError', false);
+
+    if (!password || password.length < 6) { setError('passError', true); valid = false; }
+    else setError('passError', false);
+
+    if (phone) {
+      const digits = phone.replace(/\s/g, '');
+      if (!/^\d+$/.test(digits) || digits.length > 15) {
+        setError('phoneError', true); valid = false;
+      } else setError('phoneError', false);
+    } else setError('phoneError', false);
+
+    if (!valid) return;
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name, email, password, phone })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorMsg.textContent = data.error;
+        errorMsg.classList.remove('d-none');
+        return;
+      }
+
+      document.getElementById('successMsg').classList.remove('d-none');
+      setTimeout(() => window.location.href = 'index.html', 1500);
+    } catch (err) {
+      errorMsg.textContent = 'Something went wrong. Please try again.';
+      errorMsg.classList.remove('d-none');
+    }
+  }
+</script>
+</body>
+</html>

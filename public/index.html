@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Bookstore — Home</title>
+  <!-- Bootstrap 5.3.3 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar navbar-expand-lg sticky-top pt-navbar">
+    <div class="container">
+      <a class="navbar-brand pt-brand" href="index.html">Online Bookstore</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="books.html">Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="search.html">Search</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="query.html">Query / FAQ</a></li>
+        </ul>
+        <!-- Quick search in navbar -->
+        <form class="d-flex w-50 action="search.html method="get">
+          <input class="form-control form-control-sm me-2 " type="search" name="q" placeholder="Search books..." />
+          <!-- Category -->
+        <select class="form-select form-select-sm" name="category">
+           <option selected>Books</option>
+           <option>eBooks</option>
+           <option>Audiobooks</option>
+           <option>Audio CDs</option>
+          <option>Stationery</option>
+        </select>
+          <button class="btn btn-sm pt-btn-outline" type="submit">Go</button>
+        </form>
+        <div id="navAuth" class="ms-3"></div>
+        <!-- Cart icon -->
+        <div class="pt-cart-wrapper ms-3">
+          <button class="pt-cart-btn" onclick="toggleCart(event)" aria-label="Shopping cart">
+            🛒
+            <span class="pt-cart-badge" id="cartBadge">0</span>
+          </button>
+          <div class="pt-cart-dropdown" id="cartDropdown">
+            <h6>Your cart</h6>
+            <div id="cartItems">
+              <p class="text-muted small mb-0">Your cart is empty.</p>
+            </div>
+            <div class="pt-cart-total" id="cartTotal" style="display:none;">
+              <span>Total</span>
+              <span id="cartTotalAmount">$0.00</span>
+            </div>
+            <a href="checkout.html" class="btn pt-btn w-100 mt-3" id="checkoutBtn" style="display:none;">Checkout &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Headline ===== -->
+  <section class="pt-hero text-center py-5">
+    <div class="container">
+      <h1 class="pt-hero-title">Welcome to Your online Bookcase </h1>
+      <p class="pt-hero-sub">Your independent online bookstore — thousands of titles across Fiction, Non-Fiction, and Children's books</p>
+      <a href="books.html" class="btn pt-btn me-2">Browse all books</a>
+      <a href="search.html" class="btn pt-btn-outline">Search catalogue</a>
+    </div>
+  </section>
+
+  <!-- ===== FEATURED BOOKS ===== -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="pt-section-title mb-4">Featured books</h2>
+
+    <div id="featuredBooksCarousel" class="carousel slide" data-bs-ride="false">
+      <div class="carousel-inner">
+
+        <!-- Slide 1 -->
+        <div class="carousel-item active">
+          <div class="row g-4">
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(0)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780743273565-M.jpg" class="card-img-top" alt="The Great Gatsby book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Fiction</span>
+                  <h5 class="card-title pt-card-title">The Great Gatsby</h5>
+                  <p class="card-text pt-card-author">by F. Scott Fitzgerald</p>
+                  <p class="pt-price">$18.99</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(1)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780316769174-M.jpg" class="card-img-top" alt="The Catcher in the Rye book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Fiction</span>
+                  <h5 class="card-title pt-card-title">The Catcher in the Rye</h5>
+                  <p class="card-text pt-card-author">by J.D. Salinger</p>
+                  <p class="pt-price">$16.99</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(2)">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/To_Kill_a_Mockingbird_%28first_edition_cover%29.jpg" class="card-img-top" alt="To Kill a Mockingbird book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Fiction</span>
+                  <h5 class="card-title pt-card-title">To Kill a Mockingbird</h5>
+                  <p class="card-text pt-card-author">by Harper Lee</p>
+                  <p class="pt-price">$19.99</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(3)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780385490818-M.jpg" class="card-img-top" alt="The Handmaid's Tale book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Fiction</span>
+                  <h5 class="card-title pt-card-title">The Handmaid's Tale</h5>
+                  <p class="card-text pt-card-author">by Margaret Atwood</p>
+                  <p class="pt-price">$22.99</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="carousel-item">
+          <div class="row g-4">
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(4)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780671027032-M.jpg" class="card-img-top" alt="A Brief History of Time book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Non-Fiction</span>
+                  <h5 class="card-title pt-card-title">A Brief History of Time</h5>
+                  <p class="card-text pt-card-author">by Stephen Hawking</p>
+                  <p class="pt-price">$29.99</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(5)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780743260756-M.jpg" class="card-img-top" alt="Leonardo da Vinci book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Biography</span>
+                  <h5 class="card-title pt-card-title">Leonardo da Vinci</h5>
+                  <p class="card-text pt-card-author">by Walter Isaacson</p>
+                  <p class="pt-price">$31.99</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(6)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg" class="card-img-top" alt="Harry Potter book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Children's</span>
+                  <h5 class="card-title pt-card-title">Harry Potter and the Sorcerer's Stone</h5>
+                  <p class="card-text pt-card-author">by J.K. Rowling</p>
+                  <p class="pt-price">$14.99</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="card pt-book-card h-100 pt-clickable-card" onclick="openBookModal(7)">
+                <img src="https://covers.openlibrary.org/b/isbn/9780525478812-M.jpg" class="card-img-top" alt="The Fault in Our Stars book cover" />
+                <div class="card-body">
+                  <span class="badge pt-badge mb-1">Romance</span>
+                  <h5 class="card-title pt-card-title">The Fault in Our Stars</h5>
+                  <p class="card-text pt-card-author">by John Green</p>
+                  <p class="pt-price">$16.99</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <button class="carousel-control-prev" type="button" data-bs-target="#featuredBooksCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#featuredBooksCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="books.html" class="btn pt-btn-outline">View all books &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BOOK MODAL ===== -->
+<div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <div class="d-flex gap-4">
+          <img id="modalCover" src="" alt="Book cover" style="width:110px; height:160px; object-fit:cover; border-radius:4px; flex-shrink:0;" />
+          <div>
+            <span id="modalBadge" class="badge pt-badge mb-2"></span>
+            <h5 id="modalTitle" class="pt-card-title" style="font-size:1.1rem;"></h5>
+            <p id="modalAuthor" class="pt-card-author"></p>
+            <p id="modalPrice" class="pt-price mb-3"></p>
+                          <p id="modalDesc" class="small text-muted mb-3"></p>
+              <button class="btn pt-btn btn-sm" onclick="addToCartFromModal()">&#43; Add to cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ===== NEWS & EVENTS ===== -->
+  <section class="py-5">
+    <div class="container">
+      <h2 class="pt-section-title mb-4">Latest news &amp; events</h2>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="pt-news-card p-4">
+            <span class="pt-news-date">April 2026</span>
+            <h5 class="pt-news-title">Book Club — May 2026</h5>
+            <p class="text-muted">Join our monthly reading group this Saturday. We'll be discussing "The Great Journey" by J. Smith. All welcome, no booking required.</p>
+            <a href="query.html" class="pt-link">Register interest &rarr;</a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="pt-news-card p-4">
+            <span class="pt-news-date">April 2026</span>
+            <h5 class="pt-news-title">20 new titles added this week</h5>
+            <p class="text-muted">We've expanded our catalogue with 20 new books across Fiction, Non-Fiction and Children's. Check the full list in our Books section.</p>
+            <a href="books.html" class="pt-link">Browse new arrivals &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="pt-footer py-4">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h6 class="pt-footer-brand">Online Bookstore</h6>
+          <p class="small text-muted">Your independent online bookstore, based in Melbourne</p>
+        </div>
+        <div class="col-md-4">
+          <h6>Quick links</h6>
+          <ul class="list-unstyled small">
+            <li><a href="index.html" class="pt-footer-link">Home</a></li>
+            <li><a href="books.html" class="pt-footer-link">Books</a></li>
+            <li><a href="search.html" class="pt-footer-link">Search</a></li>
+            <li><a href="contact.html" class="pt-footer-link">Contact Us</a></li>
+            <li><a href="query.html" class="pt-footer-link">Query / FAQ</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h6>Contact</h6>
+          <p class="small text-muted">
+            123 Bookshelf Lane, Melbourne VIC 3000<br />
+            +61 3 9000 1234<br />
+            hello@onlinebookstore.com.au
+          </p>
+        </div>
+      </div>
+      <hr />
+      <p class="text-center small text-muted mb-0">&copy; 2026 Online Bookstore. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="cart.js"></script>
+  <script>
+  var featuredBooks = [
+    {
+      title: "The Great Gatsby",
+      author: "F. Scott Fitzgerald",
+      genre: "Fiction",
+      price: "$18.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780743273565-M.jpg",
+      desc: "Set in the Jazz Age on Long Island, the novel depicts narrator Nick Carraway's interactions with mysterious millionaire Jay Gatsby and Gatsby's obsession with reuniting with his former lover Daisy Buchanan."
+    },
+    {
+      title: "The Catcher in the Rye",
+      author: "J.D. Salinger",
+      genre: "Fiction",
+      price: "$16.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780316769174-M.jpg",
+      desc: "Narrated by the rebellious Holden Caulfield, this coming-of-age novel follows his journey through New York City after being expelled from prep school, exploring themes of identity and alienation."
+    },
+    {
+      title: "To Kill a Mockingbird",
+      author: "Harper Lee",
+      genre: "Fiction",
+      price: "$19.99",
+      img: "https://upload.wikimedia.org/wikipedia/commons/4/4f/To_Kill_a_Mockingbird_%28first_edition_cover%29.jpg",
+      desc: "Through the eyes of young Scout Finch in the American South, this Pulitzer Prize-winning novel tackles racial injustice and moral growth as her father, lawyer Atticus Finch, defends a Black man accused of a crime."
+    },
+    {
+      title: "The Handmaid's Tale",
+      author: "Margaret Atwood",
+      genre: "Fiction",
+      price: "$22.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780385490818-M.jpg",
+      desc: "A dystopian novel set in the totalitarian Republic of Gilead, where women are stripped of their rights. The story follows Offred, a Handmaid assigned to bear children for an elite couple."
+    },
+    {
+      title: "A Brief History of Time",
+      author: "Stephen Hawking",
+      genre: "Non-Fiction",
+      price: "$29.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780671027032-M.jpg",
+      desc: "Stephen Hawking's landmark work explores the universe's origins, black holes, the nature of time, and the possibility of a unified theory of physics — written for general audiences without complex mathematics."
+    },
+    {
+      title: "Leonardo da Vinci",
+      author: "Walter Isaacson",
+      genre: "Biography",
+      price: "$31.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780743260756-M.jpg",
+      desc: "Based on thousands of pages from Leonardo's notebooks, Isaacson weaves a compelling narrative of a genius whose passion for both art and science made him history's most creative mind."
+    },
+    {
+      title: "Harry Potter and the Sorcerer's Stone",
+      author: "J.K. Rowling",
+      genre: "Children's",
+      price: "$14.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg",
+      desc: "Harry Potter discovers on his eleventh birthday that he is the orphaned son of two powerful wizards and is invited to attend Hogwarts School of Witchcraft and Wizardry."
+    },
+    {
+      title: "The Fault in Our Stars",
+      author: "John Green",
+      genre: "Romance",
+      price: "$16.99",
+      img: "https://covers.openlibrary.org/b/isbn/9780525478812-M.jpg",
+      desc: "Sixteen-year-old Hazel Grace Lancaster meets and falls in love with the charismatic Augustus Waters at a cancer patient support group, in this heartfelt and witty love story."
+    }
+  ];
+
+  function openBookModal(index) {
+    var book = featuredBooks[index];
+    document.getElementById('modalCover').src          = book.img;
+    document.getElementById('modalCover').alt          = book.title + ' cover';
+    document.getElementById('modalBadge').textContent  = book.genre;
+    document.getElementById('modalTitle').textContent  = book.title;
+    document.getElementById('modalAuthor').textContent = 'by ' + book.author;
+    document.getElementById('modalPrice').textContent  = '$' + book.price;
+    document.getElementById('modalDesc').textContent   = book.desc;
+    var modal = new bootstrap.Modal(document.getElementById('bookModal'));
+    modal.show();
+  }
+
+  function addToCartFromModal() {
+    var title  = document.getElementById('modalTitle').textContent;
+    var author = document.getElementById('modalAuthor').textContent.replace('by ', '');
+    var price  = parseFloat(document.getElementById('modalPrice').textContent.replace('$', ''));
+    var img    = document.getElementById('modalCover').src;
+    addToCart(title, author, price, img);
+    bootstrap.Modal.getInstance(document.getElementById('bookModal')).hide();
+  }
+</script>
+  <script src="cart.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
