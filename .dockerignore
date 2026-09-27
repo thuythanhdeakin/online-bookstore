@@ -1,0 +1,14 @@
+.git
+node_modules
+coverage
+reports
+data
+*.db
+tests
+jenkins
+monitoring
+deploy
+scripts
+Jenkinsfile
+*.md
+.env

@@ -1,0 +1,39 @@
+# One compose definition for EVERY environment (infra-as-code).
+# Environment-specific values come from deploy/env/<env>.env + variables
+# exported by scripts/deploy.sh (IMAGE, DEPLOY_ENV, HOST_PORT, SESSION_SECRET).
+name: bookstore-${DEPLOY_ENV:?DEPLOY_ENV is required}
+
+services:
+  web:
+    image: ${IMAGE:?IMAGE is required}
+    container_name: bookstore-${DEPLOY_ENV}
+    restart: unless-stopped
+    env_file:
+      - ./env/${DEPLOY_ENV}.env
+    environment:
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
+      APP_VERSION: ${APP_VERSION:-unknown}
+    ports:
+      - "${HOST_PORT:?HOST_PORT is required}:3000"
+    volumes:
+      - data:/app/data            # SQLite file survives redeploys
+    networks: [devops-net]
+    read_only: true               # immutable container filesystem...
+    tmpfs: [/tmp]                 # ...except /tmp and the data volume
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: {cpus: "0.50", memory: 256M}
+    labels:
+      com.bookstore.env: ${DEPLOY_ENV}
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+volumes:
+  data:
+
+networks:
+  devops-net:
+    external: true

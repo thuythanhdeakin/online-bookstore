@@ -6,7 +6,7 @@ module.exports = [
   { ignores: ['node_modules/**', 'coverage/**', 'reports/**', 'data/**'] },
   js.configs.recommended,
   {
-    files: ['src/**/*.js', 'tests/**/*.js', 'eslint.config.js'],
+    files: ['src/**/*.js', 'tests/**/*.js', '*.config.js'],
     languageOptions: { ecmaVersion: 2023, sourceType: 'commonjs', globals: { ...globals.node, ...globals.jest } },
     rules: {
       complexity: ['warn', 10],

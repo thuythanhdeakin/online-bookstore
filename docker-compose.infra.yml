@@ -1,0 +1,105 @@
+# CI/CD + observability platform (run once on your laptop):
+#   cp .env.example .env   # then edit secrets
+#   docker compose -f docker-compose.infra.yml up -d --build
+#
+#   Jenkins      http://localhost:8080
+#   SonarQube    http://localhost:9000
+#   Prometheus   http://localhost:9090
+#   Alertmanager http://localhost:9093
+#   Grafana      http://localhost:3000
+#   Registry     localhost:5001  (private Docker registry = artefact storage)
+name: devops-platform
+
+networks:
+  devops-net:
+    name: devops-net   # fixed name so staging/prod app stacks can join it
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  registry_data:
+  prometheus_data:
+  grafana_data:
+
+services:
+  jenkins:
+    build: ./jenkins
+    container_name: jenkins
+    restart: unless-stopped
+    env_file: .env
+    ports: ["8080:8080"]
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock   # build/run containers on the host daemon
+    networks: [devops-net]
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    restart: unless-stopped
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    ports: ["9000:9000"]
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks: [devops-net]
+
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    ports: ["5001:5000"]   # 5000 is taken by AirPlay on macOS
+    volumes: [registry_data:/var/lib/registry]
+    networks: [devops-net]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle          # allows config reload via POST /-/reload
+    ports: ["9090:9090"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    networks: [devops-net]
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: alertmanager
+    restart: unless-stopped
+    ports: ["9093:9093"]
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks: [devops-net]
+
+  # Tiny webhook that prints every alert Alertmanager sends -> visible with
+  # `docker logs -f alert-receiver`. Swap for Slack/email in alertmanager.yml.
+  alert-receiver:
+    image: python:3.12-slim
+    container_name: alert-receiver
+    restart: unless-stopped
+    command: ["python", "/app/alert_receiver.py"]
+    volumes:
+      - ./monitoring/alert_receiver.py:/app/alert_receiver.py:ro
+    networks: [devops-net]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports: ["3000:3000"]
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    networks: [devops-net]

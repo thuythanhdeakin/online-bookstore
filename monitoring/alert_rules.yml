@@ -1,0 +1,65 @@
+# Alert rules based on the "golden signals" (availability, errors, latency,
+# saturation) plus business/security signals specific to the bookstore.
+groups:
+  - name: bookstore-production
+    rules:
+      - alert: BookstoreDown
+        expr: up{job="bookstore-prod"} == 0
+        for: 30s
+        labels: {severity: critical, env: production}
+        annotations:
+          summary: "Online Bookstore production is DOWN"
+          description: "Prometheus cannot scrape {{ $labels.instance }} for more than 30s."
+
+      - alert: BookstoreHighErrorRate
+        expr: |
+          (sum(rate(http_requests_total{job="bookstore-prod",status=~"5.."}[1m])) or vector(0))
+            / clamp_min(sum(rate(http_requests_total{job="bookstore-prod"}[1m])), 0.001) > 0.05
+        for: 30s
+        labels: {severity: critical, env: production}
+        annotations:
+          summary: "5xx error rate above 5%"
+          description: "Current 5xx ratio is {{ $value | humanizePercentage }}."
+
+      - alert: BookstoreHighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket{job="bookstore-prod"}[2m]))) > 1
+        for: 1m
+        labels: {severity: warning, env: production}
+        annotations:
+          summary: "p95 latency above 1s"
+          description: "p95 latency is {{ $value | humanizeDuration }}."
+
+      - alert: BookstoreHighMemory
+        expr: process_resident_memory_bytes{job="bookstore-prod"} > 200 * 1024 * 1024
+        for: 2m
+        labels: {severity: warning, env: production}
+        annotations:
+          summary: "Memory usage above 200MB (container limit 256MB)"
+          description: "RSS is {{ $value | humanize1024 }}B."
+
+      - alert: BookstoreEventLoopLag
+        expr: nodejs_eventloop_lag_p99_seconds{job="bookstore-prod"} > 0.2
+        for: 1m
+        labels: {severity: warning, env: production}
+        annotations:
+          summary: "Node.js event loop p99 lag above 200ms"
+          description: "The single JS thread is blocked (sync DB writes / bcrypt?)."
+
+      - alert: BookstoreLoginBruteForce
+        expr: increase(bookstore_login_failures_total{job="bookstore-prod"}[5m]) > 20
+        labels: {severity: warning, env: production}
+        annotations:
+          summary: "Possible brute-force: >20 failed logins in 5 minutes"
+          description: "{{ $value }} failed logins in the last 5 minutes."
+
+  - name: bookstore-staging
+    rules:
+      - alert: BookstoreStagingDown
+        expr: up{job="bookstore-staging"} == 0
+        for: 1m
+        labels: {severity: warning, env: staging}
+        annotations:
+          summary: "Bookstore staging is down"
+          description: "Staging target {{ $labels.instance }} unreachable."

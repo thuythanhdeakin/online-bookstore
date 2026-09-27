@@ -1,0 +1,38 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: team-webhook
+  group_by: [alertname, env]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  routes:
+    - matchers: [severity="critical"]
+      receiver: team-webhook
+      repeat_interval: 10m
+
+receivers:
+  - name: team-webhook
+    webhook_configs:
+      - url: http://alert-receiver:5001/alert
+        send_resolved: true
+    # --- Optional: real team notifications (uncomment + fill in) ---
+    # slack_configs:
+    #   - api_url: https://hooks.slack.com/services/XXX/YYY/ZZZ
+    #     channel: "#bookstore-alerts"
+    #     send_resolved: true
+    #     title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+    #     text: '{{ range .Alerts }}{{ .Annotations.summary }} - {{ .Annotations.description }}{{ "\n" }}{{ end }}'
+    # email_configs:
+    #   - to: you@deakin.edu.au
+    #     from: alerts@example.com
+    #     smarthost: smtp.gmail.com:587
+    #     auth_username: you@gmail.com
+    #     auth_password: <gmail-app-password>
+
+inhibit_rules:
+  # If prod is DOWN, don't also spam latency/error alerts.
+  - source_matchers: [alertname="BookstoreDown"]
+    target_matchers: [env="production"]
+    equal: [env]

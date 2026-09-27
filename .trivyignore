@@ -1,0 +1,5 @@
+# Accepted / false-positive vulnerabilities. EVERY entry needs a justification
+# and a review date - this file is part of the security audit trail.
+#
+# Format:
+# CVE-XXXX-YYYY   # <why accepted>, reviewed <date>, owner <name>, revisit <date>

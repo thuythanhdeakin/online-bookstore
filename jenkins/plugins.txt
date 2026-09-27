@@ -1,0 +1,15 @@
+configuration-as-code
+workflow-aggregator
+pipeline-stage-view
+git
+github
+credentials-binding
+sonar
+junit
+coverage
+warnings-ng
+htmlpublisher
+timestamper
+ws-cleanup
+email-ext
+build-timeout
