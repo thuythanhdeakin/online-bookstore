@@ -73,7 +73,7 @@ def simulate_incident(args) -> dict | None:
         lambda: any(a["labels"]["alertname"] == "BookstoreHighErrorRate"
                     for a in json.loads(http(f"{args.alertmanager}/api/v2/alerts")[1])),
         60, label="Alertmanager notification")
-    print("  Alertmanager received the alert -> team notified (see `docker logs alert-receiver`)"
+    print("  Alertmanager received the alert -> team notified (see the alert-receiver log)"
           if in_am is not None else "!!! Alertmanager did not receive the alert")
     print("  Stopping error injection - alert will auto-RESOLVE in ~1-2 minutes")
     return {"detected_after_s": detected, "notified": in_am is not None}

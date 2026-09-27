@@ -1,4 +1,4 @@
-"""Merge npm audit, ESLint security (SAST) and Trivy JSON reports into one Markdown summary
+"""Merge npm audit, ESLint security (SAST), secretlint and (optional) Trivy JSON reports into one Markdown summary
 (reports/security-summary.md) so every finding is listed with its severity
 and fix status - this is what goes into the assessment report.
 
@@ -30,6 +30,15 @@ def eslint_security_rows(data):
                 sev = "HIGH" if m.get("severity") == 2 else "MEDIUM"
                 yield ("ESLint security (SAST)", sev, rule,
                        f"{Path(f['filePath']).name}:{m.get('line')}", m.get("message", "")[:120], "review code")
+
+
+def secretlint_rows(data):
+    """Leaked secrets found by secretlint (values are masked by the tool)."""
+    for f in data or []:
+        for m in f.get("messages", []):
+            yield ("secretlint (secrets)", "CRITICAL", m.get("ruleId", "").split("/")[-1],
+                   f"{Path(f.get('filePath', '')).name}:{m.get('loc', {}).get('start', {}).get('line', '?')}",
+                   m.get("message", "")[:120], "remove from git history + rotate secret")
 
 
 def npm_audit_rows(data):
@@ -65,6 +74,7 @@ def main(report_dir: str) -> None:
     rows = [
         *eslint_security_rows(load(d / "eslint-security.json")),
         *npm_audit_rows(load(d / "npm-audit.json")),
+        *secretlint_rows(load(d / "secretlint.json")),
         *trivy_rows(load(d / "trivy-image.json"), "Trivy image"),
         *trivy_rows(load(d / "trivy-fs.json"), "Trivy fs"),
     ]

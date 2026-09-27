@@ -2,30 +2,31 @@
 
 My SIT774 *Online Bookstore* (Node.js + Express 5 + SQLite via sql.js) delivered by a **7-stage
 Jenkins pipeline**: Build → Test → Code Quality → Security → Deploy → Release → Monitoring.
-The CI server, SonarQube, image registry, staging, production, Prometheus, Alertmanager and
-Grafana all run locally in Docker and are defined as code in this repository.
+Everything runs on a Mac with Homebrew – Jenkins, staging and production (managed by pm2),
+Prometheus, Alertmanager and Grafana – and is defined as code in this repository.
 
-## Architecture
+## Architecture (default: Jenkins on macOS, no Docker)
 
 ```mermaid
 flowchart LR
   dev[git push] --> gh[(GitHub)]
-  gh -- pollSCM 2 min --> J[Jenkins]
+  gh -- pollSCM 2 min --> J[Jenkins - Homebrew]
   subgraph Pipeline
-    B[Build<br/>npm ci + docker build/push] --> T[Test<br/>Jest unit + Supertest integration<br/>coverage gate]
-    T --> Q[Code Quality<br/>ESLint + SonarQube gate]
-    Q --> S[Security<br/>ESLint-security SAST, npm audit,<br/>Trivy image + secrets]
-    S --> D[Deploy staging<br/>compose, health gate,<br/>auto-rollback, smoke E2E]
-    D --> R[Release prod<br/>promote same image,<br/>tag, release notes]
+    B[Build<br/>npm ci + versioned tar.gz<br/>+ SHA-256] --> T[Test<br/>Jest unit + Supertest<br/>coverage gate]
+    T --> Q[Code Quality<br/>ESLint + jscpd gates<br/>optional SonarQube]
+    Q --> S[Security<br/>SAST, npm audit,<br/>secretlint]
+    S --> D[Deploy staging :8001<br/>pm2, health gate,<br/>auto-rollback, E2E smoke]
+    D --> R[Release prod :8002<br/>same artefact, tag,<br/>release notes]
     R --> M[Monitoring<br/>Prometheus checks,<br/>incident simulation]
   end
   J --> B
-  B -.image.-> REG[(Registry :5001)]
-  REG -.-> STG[bookstore-staging :8001]
-  REG -.-> PRD[bookstore-production :8002]
-  PRD -- /metrics --> P[Prometheus] --> AM[Alertmanager] --> RCV[webhook / Slack / email]
-  P --> G[Grafana]
+  B -.artefact.-> STORE[(~/bookstore-artifacts)]
+  PRD[bookstore-production] -- /metrics --> P[Prometheus :9090] --> AM[Alertmanager :9093] --> RCV[alert receiver log]
+  P --> G[Grafana :3000 optional]
 ```
+
+`Jenkinsfile.docker` + `docker-compose.infra.yml` contain an alternative, fully containerised
+variant (Jenkins, SonarQube, registry and the app all in Docker) – not needed for the default setup.
 
 ## The application
 
@@ -51,62 +52,69 @@ flowchart LR
 
 | # | Stage | Tools | Gate / automation |
 |---|---|---|---|
-| 1 | **Build** | `npm ci`, Docker multi-stage build, private registry | image tag `VERSION-bBUILD-GITSHA`, OCI labels, pushed = artefact storage |
-| 2 | **Test** | Jest, Supertest, jest-junit | 79 tests (unit + integration + security regression), JUnit + coverage published, **fails under 80 % lines / 70 % branches** |
-| 3 | **Code Quality** | ESLint (complexity, max-depth, function length), SonarQube | ESLint ≤ 10 warnings; custom *Bookstore Gate* (coverage, duplication ≤ 3 %, maintainability A…) via `waitForQualityGate` |
-| 4 | **Security** | ESLint-security + no-unsanitized (SAST), npm audit (SCA), Trivy image + fs | 4 parallel scans with gates, merged `security-summary.md` – see [SECURITY.md](SECURITY.md) |
-| 5 | **Deploy** | Docker Compose (`deploy/docker-compose.app.yml`) | staging, health-gated, **automatic rollback**, E2E smoke tests (register → order → history) |
-| 6 | **Release** | registry promotion, git tag | same image promoted (no rebuild), `vX.Y.Z-bN` + `production` tags, prod secrets/config, optional approval, release notes |
-| 7 | **Monitoring** | Prometheus, Alertmanager, Grafana | verifies scraping + 7 alert rules, live KPIs, UNSTABLE on critical alerts, `SIMULATE_INCIDENT` proves alert → notification |
+| 1 | **Build** | `npm ci`, `scripts/package.sh` | versioned artefact `online-bookstore-<ver>-b<build>-<sha>.tar.gz` + SHA-256, archived in Jenkins and in `~/bookstore-artifacts` |
+| 2 | **Test** | Jest, Supertest, jest-junit | 79 tests (unit + integration + security regression); fails under 80 % lines / 70 % branches |
+| 3 | **Code Quality** | ESLint, jscpd, (SonarQube optional) | 0 errors & ≤ 10 warnings (complexity ≤ 10, depth ≤ 3, fn ≤ 60 lines); duplication ≤ 3 %; trend graphs in Jenkins |
+| 4 | **Security** | ESLint-security + no-unsanitized (SAST), npm audit (SCA), secretlint | 3 parallel gates + merged `security-summary.md` – see [SECURITY.md](SECURITY.md) |
+| 5 | **Deploy** | `scripts/deploy-local.sh` + pm2 | staging on :8001, health-gated, **automatic rollback** to previous release, E2E smoke tests |
+| 6 | **Release** | same script, git tag | checksum-verified promotion of the SAME artefact to :8002, prod secrets/config, optional approval, release notes |
+| 7 | **Monitoring** | Prometheus, Alertmanager (+ Grafana) | starts the stack if needed, verifies scraping + 7 alert rules, live KPIs, `SIMULATE_INCIDENT` proves alert → notification |
 
-## Quick start
-
-Prerequisites: Docker Desktop (≥ 6 GB RAM), Git.
+## Setup on macOS (no Docker)
 
 ```bash
-git clone https://github.com/<you>/online-bookstore.git && cd online-bookstore
-cp .env.example .env                      # set passwords + 2 session secrets (>= 32 chars)
-docker compose -f docker-compose.infra.yml up -d --build
-
-# SonarQube: http://localhost:9000 (admin/admin -> change password), then:
-SONAR_ADMIN_PASSWORD=<new-password> ./scripts/sonar_setup.sh
-#   My Account -> Security -> Global Analysis token -> put in .env as SONAR_TOKEN
-docker compose -f docker-compose.infra.yml up -d jenkins
-
-# Jenkins: http://localhost:8080 -> New Item -> Pipeline -> "Pipeline script from SCM"
-#   Git URL = this repo, branch */main, Script Path = Jenkinsfile -> Build Now
+# 1. Tools (once)
+brew install jenkins-lts node prometheus alertmanager      # optional: brew install grafana
+npm install -g pm2
+brew services start jenkins-lts                             # Jenkins -> http://localhost:8080
+cat ~/.jenkins/secrets/initialAdminPassword                 # (path may be ~/.jenkins or $(brew --prefix)/var/jenkins)
 ```
 
-| Service | URL |
+2. **Jenkins first start**: paste the password → *Install suggested plugins* → create admin user.
+   Then *Manage Jenkins → Plugins → Available* and install: **Coverage**, **Warnings**, **HTML Publisher**,
+   **Pipeline: Stage View** (and **SonarQube Scanner** only if you use `USE_SONARQUBE`).
+3. **Credentials** (*Manage Jenkins → Credentials → System → Global → Add*):
+
+   | ID | Kind | Value |
+   |---|---|---|
+   | `github-token` | Username with password | GitHub username + personal access token (classic, `repo`) |
+   | `staging-session-secret` | Secret text | output of `openssl rand -hex 32` |
+   | `prod-session-secret` | Secret text | another `openssl rand -hex 32` |
+
+4. **Job**: *New Item* → `online-bookstore` → **Pipeline** → *Pipeline script from SCM* → Git →
+   repo URL + `github-token` → branch `*/main` → Script Path `Jenkinsfile` → **Build Now**.
+
+| What | URL |
 |---|---|
 | Jenkins | http://localhost:8080 |
-| SonarQube | http://localhost:9000 |
 | Bookstore – staging | http://localhost:8001 |
 | Bookstore – production | http://localhost:8002 |
 | Prometheus alerts | http://localhost:9090/alerts |
 | Alertmanager | http://localhost:9093 |
-| Grafana | http://localhost:3000/d/bookstore-overview |
-| Alert notifications | `docker logs -f alert-receiver` |
+| Grafana (optional) | http://localhost:3000/d/bookstore-overview |
+| Alert notifications | `tail -f ~/bookstore-monitoring/alerts.log` |
+| Running processes | `pm2 ls` / `pm2 logs bookstore-production` |
 
-Admin page: register with the e-mail in `ADMIN_EMAILS` (`admin@bookstore.local` by default, see `deploy/env/*.env`).
+Admin page: register with `admin@bookstore.local` (see `ADMIN_EMAILS` in `deploy/env/*.env`).
 
-### Local development
+### Useful commands
 
 ```bash
-npm ci
-npm test                 # all tests + coverage
+npm ci && npm test                    # all tests + coverage
 npm run lint
-PORT=3100 npm start      # port 3000 is used by Grafana
+PORT=3100 npm start                   # local dev server
+SESSION_SECRET=$(openssl rand -hex 32) scripts/deploy-local.sh production --rollback   # manual rollback
+pm2 stop bookstore-production         # simulate an outage -> BookstoreDown alert after ~30 s
+scripts/monitoring-local.sh down      # stop Prometheus/Alertmanager/Grafana
 ```
 
-Build parameters: `REQUIRE_APPROVAL` (manual gate before prod), `SIMULATE_INCIDENT` (inject 5xx errors
-and prove alerting), `PUSH_GIT_TAG` (push release tag, needs a `github-token` credential).
+Build parameters: `REQUIRE_APPROVAL`, `SIMULATE_INCIDENT`, `USE_SONARQUBE`, `PUSH_GIT_TAG`.
 
 ## Design decisions
 
-* **Build once, deploy many** – the image tested in staging is the one released; environments differ only
+* **Build once, deploy many** – the artefact tested in staging is the one released (SHA-256 verified); environments differ only
   by `deploy/env/*.env` and Jenkins credentials.
 * **Fail fast, cheapest first** – tests (seconds) before SonarQube and scans (minutes); scans run in parallel.
 * **Never trust the client** – prices, totals and admin rights are decided on the server.
 * **Schema as code** – migrations are versioned and run on start-up, so every environment converges.
-* **Health-gated deploys** – a container that never becomes `healthy` is rolled back automatically.
+* **Health-gated deploys** – a release that does not answer `/health` with the expected version is rolled back automatically (pm2 restarts the previous release folder).

@@ -7,8 +7,8 @@ and a *full report* archived in Jenkins (`reports/*.json` + merged `reports/secu
 |---|---|---|---|
 | ESLint + `eslint-plugin-security` + `eslint-plugin-no-unsanitized` | SAST | `eval`, unsafe regex, child_process, DOM XSS sinks (`innerHTML`) | any error |
 | `npm audit` | SCA | known CVEs in npm packages we ship | moderate+ in production deps |
-| Trivy image | Container | CVEs in OS packages + node_modules inside the image | fixable HIGH/CRITICAL |
-| Trivy fs | Secrets / IaC | leaked keys in git, insecure Dockerfile settings | any secret |
+| secretlint | Secrets | API keys, tokens, private keys committed to git | any secret |
+| Trivy image + fs *(Docker variant only, `Jenkinsfile.docker`)* | Container / IaC | CVEs in the image, insecure Dockerfile settings | fixable HIGH/CRITICAL, any secret |
 
 Every fixed finding has a **regression test** in `tests/integration/security.test.js`, so it cannot silently return.
 
