@@ -1,12 +1,41 @@
 'use strict';
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const { rateLimit } = require('express-rate-limit');
 const { normaliseEmail, validateRegistration } = require('../services/validation');
 
-module.exports = function authRoutes({ db, metrics }) {
-  const router = express.Router();
+// Compared against when the e-mail does not exist, so a failed login takes the
+// same time whether or not the account exists (prevents timing-based enumeration).
+const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', 10);
+const LOGIN_FAILED = 'Invalid email or password.';
 
-  router.post('/register', (req, res) => {
+/** New session id on login -> prevents session fixation. */
+function startSession(req, user, done) {
+  req.session.regenerate((err) => {
+    if (err) return done(err);
+    req.session.userId = user.id;
+    req.session.userName = user.full_name;
+    req.session.email = user.email;
+    return done();
+  });
+}
+
+function createAuthLimiter(limit) {
+  return rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // only failed attempts count towards the limit
+    message: { error: 'Too many attempts. Please try again in 15 minutes.' },
+  });
+}
+
+module.exports = function authRoutes({ db, metrics, config }) {
+  const router = express.Router();
+  const authLimiter = createAuthLimiter(config.authRateLimit);
+
+  router.post('/register', authLimiter, (req, res, next) => {
     const error = validateRegistration(req.body || {});
     if (error) return res.status(400).json({ error });
 
@@ -24,33 +53,32 @@ module.exports = function authRoutes({ db, metrics }) {
     ]);
     const user = db.get('SELECT id, full_name, email FROM users WHERE email = ?', [email]);
     metrics.usersRegistered.inc();
-    req.session.userId = user.id;
-    req.session.userName = user.full_name;
-    return res.status(201).json({ success: true, user });
+    return startSession(req, user, (err) => (err ? next(err) : res.status(201).json({ success: true, user })));
   });
 
-  router.post('/login', (req, res) => {
+  router.post('/login', authLimiter, (req, res, next) => {
     const { password } = req.body || {};
     const email = normaliseEmail(req.body && req.body.email);
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     const user = db.get('SELECT * FROM users WHERE email = ?', [email]);
-    if (!user) {
+    const passwordOk = bcrypt.compareSync(String(password), user ? user.password : DUMMY_HASH);
+    if (!user || !passwordOk) {
+      // Same message + status for "no such user" and "wrong password" (no account enumeration)
       metrics.loginFailures.inc();
-      return res.status(400).json({ error: 'No account found with this email.' });
+      return res.status(401).json({ error: LOGIN_FAILED });
     }
-    if (!bcrypt.compareSync(password, user.password)) {
-      metrics.loginFailures.inc();
-      return res.status(400).json({ error: 'Incorrect password.' });
-    }
-    req.session.userId = user.id;
-    req.session.userName = user.full_name;
-    return res.json({ success: true, user: { id: user.id, full_name: user.full_name, email: user.email } });
+    return startSession(req, user, (err) => (err ? next(err) : res.json({
+      success: true, user: { id: user.id, full_name: user.full_name, email: user.email },
+    })));
   });
 
   router.post('/logout', (req, res) => {
-    req.session.destroy(() => res.json({ success: true }));
+    req.session.destroy(() => {
+      res.clearCookie('bookstore.sid');
+      res.json({ success: true });
+    });
   });
 
   router.get('/me', (req, res) => {
@@ -59,7 +87,8 @@ module.exports = function authRoutes({ db, metrics }) {
       req.session.userId,
     ]);
     if (!user) return res.json({ loggedIn: false });
-    return res.json({ loggedIn: true, user });
+    const isAdmin = config.adminEmails.includes(user.email);
+    return res.json({ loggedIn: true, user: { ...user, isAdmin } });
   });
 
   return router;

@@ -1,8 +1,10 @@
 'use strict';
 const express = require('express');
+const { requireAdmin } = require('../middleware/auth');
 
-module.exports = function adminRoutes({ db }) {
+module.exports = function adminRoutes({ db, config }) {
   const router = express.Router();
+  router.use(requireAdmin(config.adminEmails));
 
   // Admin view of all registered users (used by useradmin.html)
   router.get('/', (req, res) => {

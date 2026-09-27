@@ -1,13 +1,18 @@
 'use strict';
 const js = require('@eslint/js');
 const globals = require('globals');
+// Registered (rules off) so inline security/* suppressions resolve; rules run in eslint.security.config.js
+const security = require('eslint-plugin-security');
 
 module.exports = [
   { ignores: ['node_modules/**', 'coverage/**', 'reports/**', 'data/**'] },
+  // security/* suppressions are evaluated by eslint.security.config.js, not here
+  { linterOptions: { reportUnusedDisableDirectives: 'off' } },
   js.configs.recommended,
   {
     files: ['src/**/*.js', 'tests/**/*.js', '*.config.js'],
     languageOptions: { ecmaVersion: 2023, sourceType: 'commonjs', globals: { ...globals.node, ...globals.jest } },
+    plugins: { security },
     rules: {
       complexity: ['warn', 10],
       'max-depth': ['warn', 3],

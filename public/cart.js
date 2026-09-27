@@ -69,35 +69,58 @@ function renderCart() {
     badge.classList.remove('visible');
   }
 
+  items.replaceChildren();
   if (cart.length === 0) {
-    items.innerHTML = '<p class="text-muted small mb-0">Your cart is empty.</p>';
+    items.appendChild(cartEl('p', 'text-muted small mb-0', 'Your cart is empty.'));
     if (total)    total.style.display    = 'none';
     if (checkout) checkout.style.display = 'none';
     return;
   }
 
-  var html = '';
+  // Built with DOM APIs + textContent: titles/img URLs from localStorage are untrusted
   cart.forEach(function(item, idx) {
-    html += '<div class="pt-cart-item">'
-      + '<img src="' + item.img + '" alt="' + item.title + '" />'
-      + '<div class="pt-cart-item-info">'
-      + '<p class="pt-cart-item-title">' + item.title + '</p>'
-      + '<p class="pt-cart-item-price">$' + item.price.toFixed(2) + '</p>'
-      + '<div class="pt-cart-qty">'
-      + '<button onclick="updateQty(' + idx + ', -1)">&#8722;</button>'
-      + '<span>' + item.qty + '</span>'
-      + '<button onclick="updateQty(' + idx + ', 1)">&#43;</button>'
-      + '</div>'
-      + '</div>'
-      + '<button class="pt-cart-remove" onclick="removeFromCart(' + idx + ')" aria-label="Remove">&#10005;</button>'
-      + '</div>';
+    var row = cartEl('div', 'pt-cart-item');
+    var img = document.createElement('img');
+    if (/^https:\/\//.test(item.img || '')) img.src = item.img;
+    img.alt = item.title;
+    row.appendChild(img);
+
+    var info = cartEl('div', 'pt-cart-item-info');
+    info.appendChild(cartEl('p', 'pt-cart-item-title', item.title));
+    info.appendChild(cartEl('p', 'pt-cart-item-price', '$' + item.price.toFixed(2)));
+    var qty = cartEl('div', 'pt-cart-qty');
+    qty.appendChild(cartButton('\u2212', function() { updateQty(idx, -1); }));
+    qty.appendChild(cartEl('span', '', String(item.qty)));
+    qty.appendChild(cartButton('+', function() { updateQty(idx, 1); }));
+    info.appendChild(qty);
+    row.appendChild(info);
+
+    var remove = cartButton('\u2715', function() { removeFromCart(idx); });
+    remove.className = 'pt-cart-remove';
+    remove.setAttribute('aria-label', 'Remove');
+    row.appendChild(remove);
+    items.appendChild(row);
   });
-  items.innerHTML = html;
 
   var sum = cart.reduce(function(s, i) { return s + i.price * i.qty; }, 0);
   if (totalAmt) totalAmt.textContent = '$' + sum.toFixed(2);
   if (total)    total.style.display  = 'flex';
   if (checkout) checkout.style.display = 'block';
+}
+
+function cartEl(tag, className, text) {
+  var node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function cartButton(label, onClick) {
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = label;
+  b.addEventListener('click', function(e) { e.stopPropagation(); onClick(); });
+  return b;
 }
 
 function toggleCart(e) {

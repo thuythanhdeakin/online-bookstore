@@ -9,7 +9,10 @@ async function createTestApp(overrides = {}) {
   const db = await createDatabase(':memory:');
   db.migrate();
   const config = {
-    ...loadConfig({ APP_ENV: 'test', SESSION_SECRET: 'test-secret', CHAOS_ENABLED: 'true' }),
+    ...loadConfig({
+      APP_ENV: 'test', SESSION_SECRET: 'test-secret', CHAOS_ENABLED: 'true',
+      ADMIN_EMAILS: 'admin@bookstore.local', AUTH_RATE_LIMIT: '1000',
+    }),
     ...overrides,
   };
   const app = createApp({ db, config });

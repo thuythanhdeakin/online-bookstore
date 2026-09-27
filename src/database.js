@@ -86,7 +86,10 @@ async function createDatabase(dbPath = process.env.DB_PATH || path.join(__dirnam
   const SQL = await initSqlJs();
   const inMemory = dbPath === ':memory:';
   let db;
+  // dbPath comes from operator config (DB_PATH env var), never from user input -> not path traversal.
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   if (!inMemory && fs.existsSync(dbPath)) {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     db = new SQL.Database(fs.readFileSync(dbPath));
   } else {
     db = new SQL.Database();
@@ -95,7 +98,9 @@ async function createDatabase(dbPath = process.env.DB_PATH || path.join(__dirnam
 
   function save() {
     if (inMemory || inTransaction) return;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- operator-controlled DB_PATH
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- operator-controlled DB_PATH
     fs.writeFileSync(dbPath, Buffer.from(db.export()));
   }
 
