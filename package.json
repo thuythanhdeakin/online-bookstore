@@ -1,8 +1,55 @@
 {
+  "name": "online-bookstore",
+  "version": "1.0.0",
+  "description": "Online Bookstore (SIT774) with a Jenkins CI/CD pipeline",
+  "private": true,
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:smoke": "jest tests/smoke",
+    "lint": "eslint ."
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/server.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "cobertura",
+      "html"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 80,
+        "branches": 70,
+        "functions": 80,
+        "statements": 80
+      }
+    }
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "prom-client": "^15.1.3",
     "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "eslint-plugin-security": "^4.1.0",
+    "globals": "^17.12.0",
+    "jest": "^30.5.2",
+    "jest-junit": "^17.0.0",
+    "supertest": "^7.3.0"
   }
 }

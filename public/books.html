@@ -26,7 +26,7 @@
           <li class="nav-item"><a class="nav-link" href="query.html">Query / FAQ</a></li>
         </ul>
         <!-- Quick search in navbar -->
-        <form class="d-flex w-50 action="search.html method="get">
+        <form class="d-flex w-50" action="search.html" method="get">
           <input class="form-control form-control-sm me-2 " type="search" name="q" placeholder="Search books..." />
           <!-- Category -->
         <select class="form-select form-select-sm" name="category">
@@ -296,7 +296,7 @@
       title: "The Great Gatsby",
       author: "F. Scott Fitzgerald",
       genre: "Fiction",
-      price: "$18.99",
+      price: 18.99,
       img: "https://covers.openlibrary.org/b/isbn/9780743273565-M.jpg",
       desc: "Set in the Jazz Age on Long Island, the novel depicts narrator Nick Carraway's interactions with mysterious millionaire Jay Gatsby and Gatsby's obsession with reuniting with his former lover Daisy Buchanan."
     },
@@ -304,7 +304,7 @@
       title: "The Catcher in the Rye",
       author: "J.D. Salinger",
       genre: "Fiction",
-      price: "$16.99",
+      price: 16.99,
       img: "https://covers.openlibrary.org/b/isbn/9780316769174-M.jpg",
       desc: "Narrated by the rebellious Holden Caulfield, this coming-of-age novel follows his journey through New York City after being expelled from prep school, exploring themes of identity and alienation."
     },
@@ -312,7 +312,7 @@
       title: "To Kill a Mockingbird",
       author: "Harper Lee",
       genre: "Fiction",
-      price: "$19.99",
+      price: 19.99,
       img: "https://upload.wikimedia.org/wikipedia/commons/4/4f/To_Kill_a_Mockingbird_%28first_edition_cover%29.jpg",
       desc: "Through the eyes of young Scout Finch in the American South, this Pulitzer Prize-winning novel tackles racial injustice and moral growth as her father, lawyer Atticus Finch, defends a Black man accused of a crime."
     },
@@ -320,7 +320,7 @@
       title: "The Handmaid's Tale",
       author: "Margaret Atwood",
       genre: "Fiction",
-      price: "$22.99",
+      price: 22.99,
       img: "https://covers.openlibrary.org/b/isbn/9780385490818-M.jpg",
       desc: "A dystopian novel set in the totalitarian Republic of Gilead, where women are stripped of their rights. The story follows Offred, a Handmaid assigned to bear children for an elite couple."
     },
@@ -328,7 +328,7 @@
       title: "A Brief History of Time",
       author: "Stephen Hawking",
       genre: "Non-Fiction",
-      price: "$29.99",
+      price: 29.99,
       img: "https://covers.openlibrary.org/b/isbn/9780671027032-M.jpg",
       desc: "Stephen Hawking's landmark work explores the universe's origins, black holes, the nature of time, and the possibility of a unified theory of physics — written for general audiences without complex mathematics."
     },
@@ -336,7 +336,7 @@
       title: "Leonardo da Vinci",
       author: "Walter Isaacson",
       genre: "Biography",
-      price: "$31.99",
+      price: 31.99,
       img: "https://covers.openlibrary.org/b/isbn/9780743260756-M.jpg",
       desc: "Based on thousands of pages from Leonardo's notebooks, Isaacson weaves a compelling narrative of a genius whose passion for both art and science made him history's most creative mind."
     },
@@ -344,7 +344,7 @@
       title: "Harry Potter and the Sorcerer's Stone",
       author: "J.K. Rowling",
       genre: "Children's",
-      price: "$14.99",
+      price: 14.99,
       img: "https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg",
       desc: "Harry Potter discovers on his eleventh birthday that he is the orphaned son of two powerful wizards and is invited to attend Hogwarts School of Witchcraft and Wizardry."
     },
@@ -352,7 +352,7 @@
       title: "The Fault in Our Stars",
       author: "John Green",
       genre: "Romance",
-      price: "$16.99",
+      price: 16.99,
       img: "https://covers.openlibrary.org/b/isbn/9780525478812-M.jpg",
       desc: "Sixteen-year-old Hazel Grace Lancaster meets and falls in love with the charismatic Augustus Waters at a cancer patient support group, in this heartfelt and witty love story."
     }
@@ -365,7 +365,7 @@
     document.getElementById('modalBadge').textContent  = book.genre;
     document.getElementById('modalTitle').textContent  = book.title;
     document.getElementById('modalAuthor').textContent = 'by ' + book.author;
-    document.getElementById('modalPrice').textContent  = '$' + book.price;
+    document.getElementById('modalPrice').textContent  = '$' + book.price.toFixed(2);
     document.getElementById('modalDesc').textContent   = book.desc;
     var modal = new bootstrap.Modal(document.getElementById('bookModal'));
     modal.show();
@@ -380,7 +380,6 @@
     bootstrap.Modal.getInstance(document.getElementById('bookModal')).hide();
   }
 </script>
-  <script src="cart.js"></script>
   <script src="auth.js"></script>
 </body>
 </html>

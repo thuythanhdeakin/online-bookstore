@@ -160,6 +160,7 @@
   async function loadOrders() {
     try {
       const res = await fetch('/api/orders');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const orders = await res.json();
       document.getElementById('ordersLoading').style.display = 'none';
 
