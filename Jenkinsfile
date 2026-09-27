@@ -6,6 +6,16 @@
 //  Checkout -> Build -> Test -> Code Quality -> Security -> Deploy (staging)
 //           -> Release (production) -> Monitoring & Alerting
 // =====================================================================
+// Report publishers (Coverage / Warnings / HTML Publisher plugins) are optional:
+// if a plugin is not installed the step is skipped instead of failing the build.
+def optionalPlugin(String what, Closure body) {
+  try {
+    body()
+  } catch (NoSuchMethodError e) {
+    echo "[skipped] ${what}: Jenkins plugin not installed"
+  }
+}
+
 pipeline {
   agent any
 
@@ -88,10 +98,16 @@ pipeline {
       post {
         always {
           junit testResults: "${REPORTS}/junit-*.xml", allowEmptyResults: false
-          recordCoverage(tools: [[parser: 'COBERTURA', pattern: 'coverage/cobertura-coverage.xml']],
-                         qualityGates: [[threshold: 80.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'FAILURE']])
-          publishHTML(target: [reportDir: 'coverage/lcov-report', reportFiles: 'index.html',
-                               reportName: 'Coverage Report', keepAll: true, alwaysLinkToLastBuild: true, allowMissing: true])
+          script {
+            optionalPlugin('Coverage trend') {
+              recordCoverage(tools: [[parser: 'COBERTURA', pattern: 'coverage/cobertura-coverage.xml']],
+                             qualityGates: [[threshold: 80.0, metric: 'LINE', baseline: 'PROJECT', criticality: 'FAILURE']])
+            }
+            optionalPlugin('Coverage HTML report') {
+              publishHTML(target: [reportDir: 'coverage/lcov-report', reportFiles: 'index.html',
+                                   reportName: 'Coverage Report', keepAll: true, alwaysLinkToLastBuild: true, allowMissing: true])
+            }
+          }
         }
       }
     }
@@ -117,9 +133,15 @@ pipeline {
       }
       post {
         always {
-          recordIssues(enabledForFailure: true, tools: [esLint(pattern: "${REPORTS}/eslint.json")])
-          publishHTML(target: [reportDir: "${REPORTS}/jscpd", reportFiles: 'jscpd-report.html',
-                               reportName: 'Duplication Report', keepAll: true, allowMissing: true])
+          script {
+            optionalPlugin('ESLint issue trend') {
+              recordIssues(enabledForFailure: true, tools: [esLint(pattern: "${REPORTS}/eslint.json")])
+            }
+            optionalPlugin('Duplication HTML report') {
+              publishHTML(target: [reportDir: "${REPORTS}/jscpd", reportFiles: 'jscpd-report.html',
+                                   reportName: 'Duplication Report', keepAll: true, allowMissing: true])
+            }
+          }
         }
       }
     }
