@@ -6,3 +6,4 @@ reports/
 .env
 .scannerwork/
 dist/
+__pycache__/

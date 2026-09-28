@@ -9,6 +9,8 @@
 
 Only uses the standard library so it runs on the Jenkins agent without a venv.
 """
+from __future__ import annotations  # macOS /usr/bin/python3 is 3.9: allow "dict | None" hints
+
 import argparse
 import json
 import sys
