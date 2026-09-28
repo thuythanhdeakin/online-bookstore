@@ -66,6 +66,8 @@ pipeline {
           currentBuild.displayName = "#${env.BUILD_NUMBER} ${env.BUILD_TAG_NAME}"
         }
         sh '''
+          # Clean outputs of previous builds so only THIS build's artefact and reports are archived
+          rm -rf dist ${REPORTS} coverage
           mkdir -p ${REPORTS}
           echo "node $(node --version) | npm $(npm --version) | pm2 $(pm2 --version 2>/dev/null || echo MISSING)"
         '''
@@ -235,7 +237,7 @@ pipeline {
           git -c user.name=jenkins -c user.email=jenkins@localhost tag -a ${RELEASE_TAG} -m "Release ${RELEASE_TAG}"
           {
             echo "# Release ${RELEASE_TAG}"
-            echo "Artefact: ${APP_NAME}-${RELEASE_TAG}.tar.gz ($(cut -d' ' -f1 dist/*.sha256))"
+            echo "Artefact: ${APP_NAME}-${RELEASE_TAG}.tar.gz ($(cut -d' ' -f1 dist/${APP_NAME}-${BUILD_TAG_NAME}.tar.gz.sha256))"
             echo "Date: $(date -u)"
             echo; echo "## Changes"
             git log --pretty='- %h %s (%an)' ${PREV}..HEAD
